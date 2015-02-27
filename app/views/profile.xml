@@ -1,0 +1,6 @@
+<Alloy> 
+   <Window class="container"> 
+      <Label id="titleLabel"></Label>
+      <Label id="authorLabel"></Label> 
+   </Window> 
+</Alloy>

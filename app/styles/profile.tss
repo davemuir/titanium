@@ -1,0 +1,18 @@
+"#titleLabel": {
+    font: {
+        fontSize: '30'
+    },
+    left: '10',
+     top:'30'
+},
+"#authorLabel": {
+    font: {
+        fontSize: '20'
+    },
+    left: '10',
+    top:'15'
+}
+
+"Window": {
+	backgroundColor: "#fff"
+}
