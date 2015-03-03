@@ -18,7 +18,7 @@
   ...
     <ios>
         <plist>
-            <dict>
+            <dict>    
                 <key>UISupportedInterfaceOrientations~iphone</key>
                 <array>
                     <string>UIInterfaceOrientationPortrait</string>
@@ -53,6 +53,7 @@
     <modules>
         <module platform="iphone">com.leftlanelab.firebase</module>
         <module platform="commonjs">ti.cloud</module>
+        <module platform="iphone">com.appcelerator.urlSession</module>
     </modules>
     <deployment-targets>
         <target device="android">true</target>
