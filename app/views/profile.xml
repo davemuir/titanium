@@ -1,6 +1,6 @@
 <Alloy> 
-   <Window class="container"> 
-      <Label id="titleLabel"></Label>
-      <Label id="authorLabel"></Label> 
+   <Window class="container" id="profileContainer"> 
+      <Label id="titleLabel">profile</Label>
+      <Button id="indexButton" onClick="indexReturn" title="back" />
    </Window> 
 </Alloy>

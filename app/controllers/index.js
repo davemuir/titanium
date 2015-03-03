@@ -1,5 +1,3 @@
-$.index.open();
-
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
 Titanium.UI.setBackgroundColor('#000');
 
@@ -7,67 +5,80 @@ Titanium.UI.setBackgroundColor('#000');
 // create tab group
 var tabGroup = Titanium.UI.createTabGroup();
 var Firebase = require('com.leftlanelab.firebase');
-//var firebaseReference = Firebase.new('https://l3-appcelerator-demo.firebaseio.com/users');
-var user = 'Dave';
+
+//get user from sign in
+var user = '1';
 var sampleChatRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
-var fredNameRef = sampleChatRef.child('users/'+user+'/name');
-//fredNameRef.set({first: 'Dave', last: 'Muir'});
+var nameRef = sampleChatRef.child('users/'+user);
+var nameListRef = sampleChatRef.child('users');
 
+var listView = Ti.UI.createListView();
+var section = Ti.UI.createListSection();
 
-
-// create base UI tab and root window
-//
+//create the windows
 var win1 = Titanium.UI.createWindow({  
-    title:'Tab 1',
+    title:'list',
     backgroundColor:'#fff'
 });
 var tab1 = Titanium.UI.createTab({  
     icon:'KS_nav_views.png',
-    title:'Tab 1',
+    title:'list',
     window:win1
 });
 
-var label1 = Titanium.UI.createLabel({
-	color:'#999',
-	text:'I am Window 1',
-	font:{fontSize:20,fontFamily:'Helvetica Neue'},
-	textAlign:'center',
-	width:'auto'
+
+nameListRef.on("value", function(snapshot) {
+  var list = snapshot.val();  
+  
+  for(var item in list){
+  	
+  		var sampleChatRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
+  		var nameItem = sampleChatRef.child('users/'+item);
+  		
+  		nameItem.on("value", function(snap) {
+  			var fullName = snap.val().first+' '+snap.val().last;
+  			var uid = snap.val().id;
+  			var items = [{properties : {title: fullName,id:uid } }];
+  			
+  			section.appendItems(items);
+  			
+		});
+		
+  }
+}, function (errorObject) {
+  console.log("The read failed: " + errorObject.code);
 });
 
-win1.add(label1);
-
-//
-// create controls tab and root window
-//
-var win2 = Titanium.UI.createWindow({  
-    title:'Tab 2',
-    backgroundColor:'#fff'
-});
-var tab2 = Titanium.UI.createTab({  
-    icon:'KS_nav_ui.png',
-    title:'Tab 2',
-    window:win2
-});
-
-var label2 = Titanium.UI.createLabel({
-	color:'#999',
-	text:'I am Window 2',
-	font:{fontSize:20,fontFamily:'Helvetica Neue'},
-	textAlign:'center',
-	width:'auto'
-});
-
-win2.add(label2);
+listView.sections = [section];
+win1.add(listView);
 
 
+listView.addEventListener('itemclick',function(e){
+	var lin = e.section.getItemAt(e.itemIndex);
+	var id = lin.properties;
+	id = id.id;
+	profileWindow(id);
+ });
+ 
+ 
 var win3 = Titanium.UI.createWindow({  
-    title:'Tab 1',
+    title:'Chat',
     backgroundColor:'#fff'
 });
+var view3 = Titanium.UI.createView({
+   backgroundColor:'#D4D4D4',
+   width:'100%',
+   height:'80%',
+   top:0
+});
+var scrollableView = Ti.UI.createScrollableView({
+  views:[view3],
+  showPagingControl:false
+});
+
 var tab3 = Titanium.UI.createTab({  
     icon:'KS_nav_views.png',
-    title:'Tab 1',
+    title:'Chat',
     window:win3
 });
 
@@ -93,58 +104,95 @@ var sendBtn = Ti.UI.createButton({
 });
 sendBtn.addEventListener('click',function(event){
 	var textVal = names.value;
-	showChat(textVal);
+	showChat(textVal,user);
+	names.value = '';
 });
-//win3.add(chatContainer);
+/*
+var listView2 = Ti.UI.createListView({
+	 backgroundColor:'#D4D4D4',
+	  separatorColor:'transparent',
+        separatorStyle:0
+});
+
+var section2 = Ti.UI.createListSection();
+listView2.sections = [section2];
+view3.add(listView2);
+*/
+
+var table = Ti.UI.createTableView({
+	 backgroundColor:'#D4D4D4',
+	  separatorColor:'transparent',
+        separatorStyle:0
+});
+
+win3.add(scrollableView);
+view3.add(table);
 win3.add(names);
 win3.add(sendBtn);
+var tableView = [];
+//table.add(Ti.UI.createTableViewRow({ title: 'Bananas' }));
+function showChat(textVal,user){
 
-//add tabs
-tabGroup.addTab(tab1);  
-tabGroup.addTab(tab2);  
-tabGroup.addTab(tab3);  
-
-
-// open tab group
-tabGroup.open();
-
-
-function showChat(textVal){
-
-	fredNameRef.on('value', function (nameSnapshot) {
+	nameRef.on('value', function (nameSnapshot) {
   		var y = nameSnapshot.val();
-  		console.log(nameSnapshot.val());
+  		
 	});
-
-	var messageListRef = sampleChatRef.child('message_list');
+	console.log(nameRef);
+	
+	var messageListRef = sampleChatRef.child('chat_room/'+user);
 	messageListRef.push({'user_id': user, 'text': textVal});
 
 	messageListRef.on('child_added', function(newMessageSnapshot) {
-  	var userId = newMessageSnapshot.child('user_id').val();
-  	var text = newMessageSnapshot.child('text').val();
-  	console.log(text);
+  		var userId = newMessageSnapshot.child('user_id').val();
+  		var text = newMessageSnapshot.child('text').val();
+  		//console.log(text);
 	});
-
+	
+	var row = Ti.UI.createTableViewRow({
+    className: 'row',
+    objName: 'row',
+    backgroundColor:'#5DFF92',//46BCFF
+    touchEnabled: true,
+    height: 100
+  	});
+  	var enabledWrapperView = Ti.UI.createView({
+    backgroundColor:'#008FD5',
+    objName: 'enabledWrapperView',
+    width: Ti.UI.FILL, height: '100%'
+  });
+  
+  var disabledWrapperView = Ti.UI.createView({
+    backgroundColor:'#A2E0FF',
+    objName: 'disabledWarpperView',
+    touchEnabled: false,
+    width: 300, height: '80%'
+  });
+  enabledWrapperView.add(disabledWrapperView);
+  
+  var label = Ti.UI.createLabel({
+    backgroundColor:'#313F48',
+    color: '#000',
+    text: textVal,
+    touchEnabled: false,
+  });
+  
+  	disabledWrapperView.add(label);
+  	row.add(enabledWrapperView);
+  	tableView.push(row);
+	table.setData(tableView);
 }
-var myProfile = Alloy.Collections.profile;
-var book = Alloy.createModel('profile', { 
-   title : 'Great Expectations', 
-   author: 'David Muir' 
-});
-myProfile.add(book); 
-book.save();
 
-function story (event) { 
-	alert('life story');
-}
-
-
-function newWindow(event){
-	var selectedBook = event.source;
-	var args = {
-        title: selectedBook.title,
-        author: selectedBook.author
-    };
-    var profile = Alloy.createController("profile", args).getView();
+//book collection stuff create maybe some models of friends lists
+function profileWindow(id){
+    var profile = Alloy.createController("profile",{
+        id: id
+    }).getView();
     profile.open();
 }
+
+
+
+tabGroup.addTab(tab1);  
+tabGroup.addTab(tab3); 
+tabGroup.open();
+//$.index.open();
