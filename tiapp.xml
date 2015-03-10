@@ -17,8 +17,9 @@
     <property name="com.leftlanelab.firebase.persistence" type="bool">true</property>
   ...
     <ios>
+        <min-ios-ver>6.1</min-ios-ver>
         <plist>
-            <dict>    
+            <dict>
                 <key>UISupportedInterfaceOrientations~iphone</key>
                 <array>
                     <string>UIInterfaceOrientationPortrait</string>
@@ -51,9 +52,10 @@
         <theme>default</theme>
     </mobileweb>
     <modules>
-        <module platform="iphone">com.leftlanelab.firebase</module>
-        <module platform="commonjs">ti.cloud</module>
         <module platform="iphone">com.appcelerator.urlSession</module>
+        <module platform="iphone">com.leftlanelab.firebase</module>
+        <module platform="iphone">org.beuckman.tibeacons</module>
+        <module platform="commonjs">ti.cloud</module>
     </modules>
     <deployment-targets>
         <target device="android">true</target>

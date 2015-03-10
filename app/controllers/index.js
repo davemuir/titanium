@@ -304,9 +304,141 @@ function profileWindow(id){
     profile.open();
 }
 
+/*----------------  BEACON  ---------------------*/
 
+//beacon ti beacons stuff
+var TiBeacons = require('org.beuckman.tibeacons');
+
+TiBeacons.addEventListener('bluetoothStatus', function(e){
+	alert(e);
+    Ti.API.info(e);
+});
+TiBeacons.requestBluetoothStatus();
+
+
+//Alloy.Collections.iBeacon.fetch();
+
+
+function enterRegion(e) {
+	alert(e);
+	var model = ensureModel(e);
+	
+	TiBeacons.startRangingForBeacons(e);
+}
+function exitRegion(e) {
+	alert(e);
+
+	var model = ensureModel(e);
+	Alloy.Collections.iBeacon.remove(model);
+
+    TiBeacons.stopRangingForBeacons(e);
+}
+function updateRanges(e) {
+	Ti.API.trace(e);
+}
+function handleProximity(e) {
+	Ti.API.info(e);
+	
+	var model = ensureModel(e);
+	//sets the proximity indication
+	model.set("proximity", e.proximity);
+}
+
+function ensureModel(e) {
+	
+	var atts = {
+		id: e.uuid+" "+e.major+" "+e.minor,
+		identifier: e.identifier,
+		uuid: e.uuid,
+		major: parseInt(e.major),
+		minor: parseInt(e.minor),
+		proximity: e.proximity
+	};
+	
+	var model;
+	var models = Alloy.Collections.iBeacon.where({id:atts.id});
+	
+	if (models.length == 0) {
+		model = Alloy.createModel("iBeacon", atts);
+		Alloy.Collections.iBeacon.add(model);
+	}
+	else {
+		//model is found and the collection item is pulled from alloy
+		model = models[0];
+		Ti.API.info("found model "+models[0].get("identifier"));	
+	}
+	//model.destroy();
+	return model;
+}
+
+
+TiBeacons.addEventListener("enteredRegion", enterRegion);
+TiBeacons.addEventListener("exitedRegion", exitRegion);
+
+TiBeacons.addEventListener("beaconRanges", updateRanges);
+TiBeacons.addEventListener("beaconProximity", handleProximity);
+	
+
+/*
+function toggleAdvertising() {
+
+    if ($.advertisingSwitch.value) {
+
+        TiBeacons.startAdvertisingBeacon({
+            uuid : $.uuid.value,
+            identifier : "TiBeacon Test",
+            major: Math.abs(parseInt($.major.value)),
+            minor: Math.abs(parseInt($.minor.value))
+        });
+        
+        Ti.App.idleTimerDisabled = true;
+        
+    } else {
+        TiBeacons.stopAdvertisingBeacon();
+        
+        Ti.App.idleTimerDisabled = false;        
+    }
+
+}
+*/
+function toggleMonitoring() {
+	console.log('toggle monitoring');
+    if ($.monitoringSwitch.value) {
+   
+        TiBeacons.startMonitoringForRegion({
+            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109777",
+            major: 30,
+            minor: 30,
+            identifier : "jordan"
+        });
+        TiBeacons.startMonitoringForRegion({
+            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7100000",
+            major: 30,
+            minor: 30,
+            identifier : "wrong beacon"
+        });
+        
+             TiBeacons.startMonitoringForRegion({
+            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A71096E0",
+            major: 70,
+            minor: 70,
+            identifier : "new beacon"
+        });
+
+    } else {
+
+		TiBeacons.stopMonitoringAllRegions();
+    }
+}
+toggleMonitoring();
+
+/*----end beacon ---*/
 
 tabGroup.addTab(tab1);  
 tabGroup.addTab(tab3); 
 tabGroup.open();
-//$.index.open();
+
+
+
+//$.win.open();
+
