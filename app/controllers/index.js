@@ -16,7 +16,7 @@ var nameRef = sampleChatRef.child('users/'+user);
 var nameListRef = sampleChatRef.child('users');
 var chatroomRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com/chat_room');
 
-
+var chatRoomBool = false;
 var listView = Ti.UI.createListView();
 var section = Ti.UI.createListSection();
 
@@ -90,6 +90,20 @@ listView.sections = [section];
 win1.add(listView);
 
 
+var win3 = Titanium.UI.createWindow({  
+    title:'Chat',
+    backgroundColor:'#fff'
+});
+var tab3 = Titanium.UI.createTab({  
+    icon:'KS_nav_views.png',
+    title:'Chat',
+    window:win3
+});
+
+/*-- Function to write the chatroom on coming into a beacon vicinity ---*/
+function createChatroom(){
+if(chatRoomBool == false){
+console.log('create the room');	
 listView.addEventListener('itemclick',function(e){
 	var lin = e.section.getItemAt(e.itemIndex);
 	var id = lin.properties;
@@ -97,11 +111,8 @@ listView.addEventListener('itemclick',function(e){
 	profileWindow(id);
  });
  
- 
-var win3 = Titanium.UI.createWindow({  
-    title:'Chat',
-    backgroundColor:'#fff'
-});
+//window for chat 
+
 var view3 = Titanium.UI.createView({
    backgroundColor:'#D4D4D4',
    width:'100%',
@@ -110,14 +121,12 @@ var view3 = Titanium.UI.createView({
 });
 var scrollableView = Ti.UI.createScrollableView({
   views:[view3],
-  showPagingControl:false
+  showPagingControl:false,
+  id:"scrollableChatView",
+  
 });
 
-var tab3 = Titanium.UI.createTab({  
-    icon:'KS_nav_views.png',
-    title:'Chat',
-    window:win3
-});
+
 
 var names = Titanium.UI.createTextArea({
     color:'#336699',
@@ -167,6 +176,8 @@ win3.add(scrollableView);
 view3.add(table);
 win3.add(names);
 win3.add(sendBtn);
+
+//EVENT listeners
 var tableView = [];
 
 
@@ -293,6 +304,26 @@ Ti.App.addEventListener('updateViews', function(e){
 
 });
 
+}
+chatRoomBool = true;
+}
+//end create chat 
+
+
+
+var defaultview3 = Titanium.UI.createView({
+   backgroundColor:'#D4D4D4',
+   width:'100%',
+   height:'100%',
+   top:0
+});
+var defaultLabel = Ti.UI.createLabel({
+    color: '#010101',
+    text: "Enable Location Services and Find a Zone",
+    font:{fontSize: '20dp'},
+  });
+win3.add(defaultview3);
+defaultview3.add(defaultLabel);
 
 
 
@@ -304,34 +335,38 @@ function profileWindow(id){
     profile.open();
 }
 
-/*----------------  BEACON  ---------------------*/
+/*----------------  BEACON MODULE ---------------------*/
 
 //beacon ti beacons stuff
 var TiBeacons = require('org.beuckman.tibeacons');
+Alloy.Collections.iBeacon = Alloy.createCollection('iBeacon');
+Alloy.Collections.iBeacon.fetch();
+
 
 TiBeacons.addEventListener('bluetoothStatus', function(e){
-	alert(e);
     Ti.API.info(e);
 });
 TiBeacons.requestBluetoothStatus();
 
 
-//Alloy.Collections.iBeacon.fetch();
+
 
 
 function enterRegion(e) {
-	alert(e);
-	var model = ensureModel(e);
-	
-	TiBeacons.startRangingForBeacons(e);
+	alert("You have entered a new region, check out the chat room ! <br/>"+e);
+	//var model = ensureModel(e);
+	console.log(e);
+	createChatroom();
+	//TiBeacons.startRangingForBeacons(e);
 }
 function exitRegion(e) {
-	alert(e);
+	alert("exiting room, see you next time!"+e);
+	destroyChatroom();
+	//var model = ensureModel(e);
+	//Alloy.Collections.iBeacon.remove(model);
 
-	var model = ensureModel(e);
-	Alloy.Collections.iBeacon.remove(model);
-
-    TiBeacons.stopRangingForBeacons(e);
+    //TiBeacons.stopRangingForBeacons(e);
+   
 }
 function updateRanges(e) {
 	Ti.API.trace(e);
@@ -344,7 +379,7 @@ function handleProximity(e) {
 	model.set("proximity", e.proximity);
 }
 
-function ensureModel(e) {
+/*function ensureModel(e) {
 	
 	var atts = {
 		id: e.uuid+" "+e.major+" "+e.minor,
@@ -366,69 +401,45 @@ function ensureModel(e) {
 		//model is found and the collection item is pulled from alloy
 		model = models[0];
 		Ti.API.info("found model "+models[0].get("identifier"));	
+		
 	}
-	//model.destroy();
+	console.log('commented createCHat');
+	//createChatroom();
 	return model;
 }
-
+*/
 
 TiBeacons.addEventListener("enteredRegion", enterRegion);
 TiBeacons.addEventListener("exitedRegion", exitRegion);
-
 TiBeacons.addEventListener("beaconRanges", updateRanges);
 TiBeacons.addEventListener("beaconProximity", handleProximity);
 	
-
-/*
-function toggleAdvertising() {
-
-    if ($.advertisingSwitch.value) {
-
-        TiBeacons.startAdvertisingBeacon({
-            uuid : $.uuid.value,
-            identifier : "TiBeacon Test",
-            major: Math.abs(parseInt($.major.value)),
-            minor: Math.abs(parseInt($.minor.value))
-        });
-        
-        Ti.App.idleTimerDisabled = true;
-        
-    } else {
-        TiBeacons.stopAdvertisingBeacon();
-        
-        Ti.App.idleTimerDisabled = false;        
-    }
-
+//start destroy chatRoom 
+function destroyChatroom(){
+//	alert('closing room');
+	//$.scrollableChatView.close();
+	//$.profileContainer.close();
+	
+	win3.add(defaultview3);
+	defaultview3.add(defaultLabel);
+	chatRoomBool = false;
 }
-*/
 function toggleMonitoring() {
-	console.log('toggle monitoring');
-    if ($.monitoringSwitch.value) {
+	//console.log('toggle monitoring');
+	// can create a privacy swicth to turn off monitioring
+   // if ($.monitoringSwitch.value) {
    
-        TiBeacons.startMonitoringForRegion({
-            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109777",
-            major: 30,
-            minor: 30,
-            identifier : "jordan"
-        });
-        TiBeacons.startMonitoringForRegion({
-            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7100000",
-            major: 30,
-            minor: 30,
-            identifier : "wrong beacon"
-        });
-        
-             TiBeacons.startMonitoringForRegion({
-            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A71096E0",
-            major: 70,
-            minor: 70,
-            identifier : "new beacon"
+       TiBeacons.startMonitoringForRegion({
+            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109666",
+            major: 666,
+            minor: 666,
+            identifier : "satan beacon"
         });
 
-    } else {
+  	//} else {
 
-		TiBeacons.stopMonitoringAllRegions();
-    }
+	//	TiBeacons.stopMonitoringAllRegions();
+    //}
 }
 toggleMonitoring();
 

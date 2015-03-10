@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:ti="http://ti.appcelerator.org">
-    <id>com.davidmuirdesign.www</id>
+    <id>ca.parsedata.tibeaconsdist</id>
     <name>ttab</name>
     <version>1.0</version>
     <publisher>ap1</publisher>
