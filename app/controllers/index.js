@@ -7,7 +7,7 @@ var tabGroup = Titanium.UI.createTabGroup();
 var Firebase = require('com.leftlanelab.firebase');
 
 //get user from sign in
-var user = '1';
+var user = '0';
 var startCount = 'true';
 var unix = Math.round(+new Date()/1000);
 
@@ -15,6 +15,7 @@ var sampleChatRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
 var nameRef = sampleChatRef.child('users/'+user);
 var nameListRef = sampleChatRef.child('users');
 var chatroomRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com/chat_room');
+
 
 var listView = Ti.UI.createListView();
 var section = Ti.UI.createListSection();
@@ -31,12 +32,41 @@ var tab1 = Titanium.UI.createTab({
 });
 
 
+nameRef.on("value", function(snapshot) {
+	  var x = snapshot.hasChild('contact_list');
+	console.log(x);
+	if(x == 1){
+  var newBase = Firebase.new('https://scorching-fire-9510.firebaseIO.com/users/'+user+'/contact_list');
+  newBase.on("value", function(snapshot) {
+  	 var flist = snapshot.val();  
+  //var len = flist.length;
+  //console.log(len);
+  for(var item in flist){
+  		console.log('count');
+  		var friendItemRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com/users/'+user+'/contact_list');
+  		var friendNameItem = friendItemRef.child(item);
+  		//var friendNameItem = friendItemRef.child('users/'+item);
+  		
+  		friendNameItem.on("value", function(snap) {
+  			var friendID = snap.val().user_id;
+  			var friendName = snap.val().user_name;
+  			console.log(friendID);
+  			var items = [{properties : {title: friendName,id:friendID } }];
+  			section.appendItems(items);
+  			
+		});
+	}	
+  });
+ }
+}, function (errorObject) {
+  console.log("The read failed: " + errorObject.code);
+});
 
 
 
-nameListRef.on("value", function(snapshot) {
+/*nameListRef.on("value", function(snapshot) {
   var list = snapshot.val();  
-  
+
   for(var item in list){
   	
   		var sampleChatRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
@@ -55,7 +85,7 @@ nameListRef.on("value", function(snapshot) {
 }, function (errorObject) {
   console.log("The read failed: " + errorObject.code);
 });
-
+*/
 listView.sections = [section];
 win1.add(listView);
 
