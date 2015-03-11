@@ -1,5 +1,5 @@
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
-Titanium.UI.setBackgroundColor('#000');
+Titanium.UI.setBackgroundColor('#D4D4D4');
 
 //set up firebase stuff
 // create tab group
@@ -17,8 +17,18 @@ var nameListRef = sampleChatRef.child('users');
 var chatroomRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com/chat_room');
 
 var chatRoomBool = false;
+var chatDialogCount = 0;
 var listView = Ti.UI.createListView();
 var section = Ti.UI.createListSection();
+
+Titanium.Geolocation.getCurrentPosition(function(e) {
+           if (e.error) {
+               alert('Error: You must Turn on Location Services to Enable the chatroom feature.' );//+ JSON.stringify(e.error));
+               return;
+           }else{
+           		toggleMonitoring();
+           }
+ });
 
 //create the windows
 var win1 = Titanium.UI.createWindow({  
@@ -30,7 +40,6 @@ var tab1 = Titanium.UI.createTab({
     title:'list',
     window:win1
 });
-
 
 nameRef.on("value", function(snapshot) {
 	  var x = snapshot.hasChild('contact_list');
@@ -62,37 +71,14 @@ nameRef.on("value", function(snapshot) {
   console.log("The read failed: " + errorObject.code);
 });
 
-
-
-/*nameListRef.on("value", function(snapshot) {
-  var list = snapshot.val();  
-
-  for(var item in list){
-  	
-  		var sampleChatRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
-  		var nameItem = sampleChatRef.child('users/'+item);
-  		
-  		nameItem.on("value", function(snap) {
-  			var fullName = snap.val().first+' '+snap.val().last;
-  			var uid = snap.val().id;
-  			var items = [{properties : {title: fullName,id:uid } }];
-  			
-  			section.appendItems(items);
-  			
-		});
-		
-  }
-}, function (errorObject) {
-  console.log("The read failed: " + errorObject.code);
-});
-*/
 listView.sections = [section];
 win1.add(listView);
 
 
 var win3 = Titanium.UI.createWindow({  
     title:'Chat',
-    backgroundColor:'#fff'
+    backgroundColor:'#fff',
+    //windowSoftInputMode:Ti.UI.Android.SOFT_INPUT_ADJUST_PAN
 });
 var tab3 = Titanium.UI.createTab({  
     icon:'KS_nav_views.png',
@@ -112,6 +98,15 @@ listView.addEventListener('itemclick',function(e){
  });
  
 //window for chat 
+var parentView3 = Titanium.UI.createScrollView({
+   backgroundColor:'#fff',
+   width:'auto',
+   height:'auto',
+   contentHeight:'100%',
+   contentWidth:'100%',
+   id:"scrollableChatView",
+   top:0
+});
 
 var view3 = Titanium.UI.createView({
    backgroundColor:'#D4D4D4',
@@ -121,19 +116,16 @@ var view3 = Titanium.UI.createView({
 });
 var scrollableView = Ti.UI.createScrollableView({
   views:[view3],
-  showPagingControl:false,
-  id:"scrollableChatView",
-  
+  showPagingControl:false
+ 
 });
-
-
 
 var names = Titanium.UI.createTextArea({
     color:'#336699',
-    bottom:100,
+    bottom:50,
     left:10,
-    width:'90%',
-    height:40,   
+    width:'85%',
+    height:75,   
     hintText:'Name',
     paddingLeft:8,
     paddingRight:8,
@@ -146,8 +138,8 @@ var sendBtn = Ti.UI.createButton({
     width:137,
     height:75,
     backgroundImage:'send.png',
-    bottom:0,
-    left:10,
+    bottom:50,
+    left:'80%',
 });
 sendBtn.addEventListener('click',function(event){
 	var textVal = names.value;
@@ -165,6 +157,7 @@ sendBtn.addEventListener('click',function(event){
 });
 
 
+
 var table = Ti.UI.createTableView({
 	 backgroundColor:'#D4D4D4',
 	  separatorColor:'transparent',
@@ -172,12 +165,25 @@ var table = Ti.UI.createTableView({
         scrollable:true
 });
 
-win3.add(scrollableView);
+
+win3.add(parentView3);
+
+parentView3.add(scrollableView);
 view3.add(table);
 win3.add(names);
 win3.add(sendBtn);
 
 //EVENT listeners
+
+names.addEventListener('focus', function() {
+    names.animate({bottom: 320, duration:300});
+    sendBtn.animate({bottom: 320, duration:300});
+});
+names.addEventListener('blur', function() {
+    names.animate({bottom: 50, duration:300});
+    sendBtn.animate({bottom: 50, duration:300});
+});
+
 var tableView = [];
 
 
@@ -237,6 +243,7 @@ Ti.App.addEventListener('updateViews', function(e){
     objName: 'row',
     backgroundColor:'#D4D4D4',
     top:10,
+    user_id:e.data.userIDV,
     touchEnabled: true
   	});
   	//outside view wrapper
@@ -296,8 +303,46 @@ Ti.App.addEventListener('updateViews', function(e){
   	tableView.push(row);
   
 	table.setData(tableView);
+	if(chatDialogCount == 0){
+		var checkID = e.data.userIDV;
+	table.addEventListener('click',function(e){
+		if(e.rowData.user_id != checkID){
+		var ModalWindow = Ti.UI.createWindow({
+  			backgroundColor:'#fff',
+  			width:'60%',
+   			height:'60%',
+   			borderRadius:10,
+   			top:'20%'
+  		});
+		
+		var dlabel = Ti.UI.createLabel({
+    		backgroundColor:color,
+    		color: '#333131',
+    		text: e.rowData.user_id,
+    		touchEnabled: false,
+      		font:{fontSize: '16dp'},
+      		top:20,
+     		height: Ti.UI.SIZE
+  		});
+  		var dbtn = Ti.UI.createButton({
+    
+   			title:'back',
+    		
+  		});
+  		
+  		ModalWindow.add(dlabel);
+  		ModalWindow.add(dbtn);
+  		ModalWindow.open({modal:true}); 
+  		dbtn.addEventListener('click',function(){
+  			//dialogParent.close();
+  			ModalWindow.close();
+  		});
+		return;
+			}
+	});
+	chatDialogCount++;
 	
-	
+	}
 	var len = table.data[0].rows.length;
 	var lengt = table.data.length;
 	table.scrollToIndex(len-1);
@@ -308,8 +353,6 @@ Ti.App.addEventListener('updateViews', function(e){
 chatRoomBool = true;
 }
 //end create chat 
-
-
 
 var defaultview3 = Titanium.UI.createView({
    backgroundColor:'#D4D4D4',
@@ -325,7 +368,9 @@ var defaultLabel = Ti.UI.createLabel({
 win3.add(defaultview3);
 defaultview3.add(defaultLabel);
 
-
+/*defaultLabel.addEventListener('click',function(e){
+	reRange();
+});*/
 
 //book collection stuff create maybe some models of friends lists
 function profileWindow(id){
@@ -339,44 +384,36 @@ function profileWindow(id){
 
 //beacon ti beacons stuff
 var TiBeacons = require('org.beuckman.tibeacons');
+TiBeacons.enableAutoRanging();
+
 Alloy.Collections.iBeacon = Alloy.createCollection('iBeacon');
 Alloy.Collections.iBeacon.fetch();
-
 
 TiBeacons.addEventListener('bluetoothStatus', function(e){
     Ti.API.info(e);
 });
 TiBeacons.requestBluetoothStatus();
 
-
-
-
-
 function enterRegion(e) {
+	if(chatRoomBool == false){
 	alert("You have entered a new region, check out the chat room ! <br/>"+e);
 	//var model = ensureModel(e);
 	console.log(e);
+	
 	createChatroom();
+	}
 	//TiBeacons.startRangingForBeacons(e);
 }
 function exitRegion(e) {
 	alert("exiting room, see you next time!"+e);
 	destroyChatroom();
-	//var model = ensureModel(e);
-	//Alloy.Collections.iBeacon.remove(model);
-
-    //TiBeacons.stopRangingForBeacons(e);
-   
 }
 function updateRanges(e) {
 	Ti.API.trace(e);
 }
 function handleProximity(e) {
 	Ti.API.info(e);
-	
-	var model = ensureModel(e);
-	//sets the proximity indication
-	model.set("proximity", e.proximity);
+	console.log('handling proximity');
 }
 
 /*function ensureModel(e) {
@@ -408,9 +445,9 @@ function handleProximity(e) {
 	return model;
 }
 */
-
-TiBeacons.addEventListener("enteredRegion", enterRegion);
 TiBeacons.addEventListener("exitedRegion", exitRegion);
+TiBeacons.addEventListener("enteredRegion", enterRegion);
+
 TiBeacons.addEventListener("beaconRanges", updateRanges);
 TiBeacons.addEventListener("beaconProximity", handleProximity);
 	
@@ -419,36 +456,66 @@ function destroyChatroom(){
 //	alert('closing room');
 	//$.scrollableChatView.close();
 	//$.profileContainer.close();
-	
+	var winObj = win3;
+	if (winObj.children) {
+        Ti.API.info('Has children! Len: ' + winObj.children.length);
+        for (var i = winObj.children.length; i > 0; i--){
+            Ti.API.info( (i-1) + ") " + winObj.children[i-1]);
+            winObj.remove(winObj.children[i-1]);
+        }
+    }
 	win3.add(defaultview3);
 	defaultview3.add(defaultLabel);
 	chatRoomBool = false;
+	chatDialogCount = 0;
 }
 function toggleMonitoring() {
 	//console.log('toggle monitoring');
 	// can create a privacy swicth to turn off monitioring
    // if ($.monitoringSwitch.value) {
-   
+   	
+   		TiBeacons.startMonitoringForRegion({
+            uuid : "00000000-DFFB-48D2-B060-D0F5A7109666",
+            major: 000,
+            minor: 000,
+            identifier : "fake beacon"
+        });
+       TiBeacons.startMonitoringForRegion({
+            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109000",
+            major: 666,
+            minor: 666,
+            identifier : "satan beacon"
+        });
+        
+		setTimeout(function(){
+			TiBeacons.startMonitoringForRegion({
+            uuid : "00000000-DFFB-48D2-B060-D0F5A7109666",
+            major: 000,
+            minor: 000,
+            identifier : "fake beacon"
+        });
        TiBeacons.startMonitoringForRegion({
             uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109666",
             major: 666,
             minor: 666,
             identifier : "satan beacon"
         });
-
+         }, 30000);
   	//} else {
 
 	//	TiBeacons.stopMonitoringAllRegions();
     //}
 }
-toggleMonitoring();
+
+
+
+
 
 /*----end beacon ---*/
 
 tabGroup.addTab(tab1);  
 tabGroup.addTab(tab3); 
 tabGroup.open();
-
 
 
 //$.win.open();
