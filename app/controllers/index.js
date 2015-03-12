@@ -15,20 +15,38 @@ var sampleChatRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
 var nameRef = sampleChatRef.child('users/'+user);
 var nameListRef = sampleChatRef.child('users');
 var chatroomRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com/chat_room');
-
+var messageListRef = sampleChatRef.child('chat_room/');
+var eventSetCount = 0;
 var chatRoomBool = false;
 var chatDialogCount = 0;
 var listView = Ti.UI.createListView();
 var section = Ti.UI.createListSection();
-
-Titanium.Geolocation.getCurrentPosition(function(e) {
+var geoCheck = false;
+//function to check geoloaction
+function checkGeolocation(){
+	if(geoCheck == false){
+		Titanium.Geolocation.getCurrentPosition(function(e) {
            if (e.error) {
                alert('Error: You must Turn on Location Services to Enable the chatroom feature.' );//+ JSON.stringify(e.error));
                return;
            }else{
            		toggleMonitoring();
+           		geoCheck = true;
            }
- });
+ 		});
+	}
+}
+checkGeolocation();
+//check geolocation on timer
+setInterval(function(){ 
+	console.log('timeout f'); 
+	Titanium.Geolocation.getCurrentPosition(function(e) {
+           if (e.error) {
+           		geoCheck = false;
+           }
+     });
+ 	checkGeolocation();
+}, 60000);
 
 //create the windows
 var win1 = Titanium.UI.createWindow({  
@@ -141,20 +159,7 @@ var sendBtn = Ti.UI.createButton({
     bottom:50,
     left:'80%',
 });
-sendBtn.addEventListener('click',function(event){
-	var textVal = names.value;
-	var userID = user;
-	//showChat(textVal,userID,user);
-	names.value = '';
-	nameListRef.child(userID).once("value", function(snapshot) {
-		var uName = snapshot.val();
-		var time =  Math.round(+new Date()/1000);
-		uName = uName.first;
-		 
-		console.log(uName);
-		Ti.App.fireEvent('updateViews', {data:{textV:textVal,userIDV:userID,userV:user,userName:uName,time:time}});
-	});
-});
+
 
 
 
@@ -186,7 +191,20 @@ names.addEventListener('blur', function() {
 
 var tableView = [];
 
-
+sendBtn.addEventListener('click',function(event){
+	var textVal = names.value;
+	var userID = user;
+	//showChat(textVal,userID,user);
+	names.value = '';
+	nameListRef.child(userID).once("value", function(snapshot) {
+		var uName = snapshot.val();
+		var time =  Math.round(+new Date()/1000);
+		uName = uName.first;
+		 
+		console.log(uName);
+		Ti.App.fireEvent('updateViews', {data:{textV:textVal,userIDV:userID,userV:user,userName:uName,time:time}});
+	});
+});
 //updates the chat from firbase anytime a new chatroom object is added
 chatroomRef.on("child_added", function(snapshot) {
 		
@@ -214,11 +232,9 @@ Ti.App.addEventListener('updateViews', function(e){
 	if(e.data.userV == e.data.userIDV){
 	
 		//console.log(nameRef);
-	
-		var messageListRef = sampleChatRef.child('chat_room/');
-		
+		//if(eventSetCount == 0){
 		messageListRef.push({'user_id': e.data.userIDV, 'text': e.data.textV,'time': e.data.time,'name':e.data.userName});
-
+		//}
 		messageListRef.on('child_added', function(newMessageSnapshot) {
   			var userId = newMessageSnapshot.child('user_id').val();
   			var text = newMessageSnapshot.child('text').val();
@@ -337,7 +353,7 @@ Ti.App.addEventListener('updateViews', function(e){
   			//dialogParent.close();
   			ModalWindow.close();
   		});
-		return;
+		return chatRoomRef;
 			}
 	});
 	chatDialogCount++;
@@ -453,9 +469,8 @@ TiBeacons.addEventListener("beaconProximity", handleProximity);
 	
 //start destroy chatRoom 
 function destroyChatroom(){
-//	alert('closing room');
-	//$.scrollableChatView.close();
-	//$.profileContainer.close();
+	 chatroomRef.off("child_added");
+    //messageListRef.off("child_added");
 	var winObj = win3;
 	if (winObj.children) {
         Ti.API.info('Has children! Len: ' + winObj.children.length);
@@ -464,10 +479,12 @@ function destroyChatroom(){
             winObj.remove(winObj.children[i-1]);
         }
     }
+ 
 	win3.add(defaultview3);
 	defaultview3.add(defaultLabel);
 	chatRoomBool = false;
 	chatDialogCount = 0;
+	eventSetCount++;
 }
 function toggleMonitoring() {
 	//console.log('toggle monitoring');
@@ -481,7 +498,7 @@ function toggleMonitoring() {
             identifier : "fake beacon"
         });
        TiBeacons.startMonitoringForRegion({
-            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109000",
+            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109666",
             major: 666,
             minor: 666,
             identifier : "satan beacon"
