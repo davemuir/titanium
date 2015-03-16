@@ -27,7 +27,7 @@ function checkGeolocation(){
 	if(geoCheck == false){
 		Titanium.Geolocation.getCurrentPosition(function(e) {
            if (e.error) {
-               alert('Error: You must Turn on Location Services to Enable the chatroom feature.' );
+               alert('Error: You must Turn on Location Services to Enable the chatroom feature.' );//+ JSON.stringify(e.error));
                return;
            }else{
            		toggleMonitoring();
@@ -107,7 +107,6 @@ var tab3 = Titanium.UI.createTab({
 /*-- Function to write the chatroom on coming into a beacon vicinity ---*/
 function createChatroom(){
 if(chatRoomBool == false){
-unix = Math.round(+new Date()/1000);
 console.log('create the room');	
 listView.addEventListener('itemclick',function(e){
 	var lin = e.section.getItemAt(e.itemIndex);
@@ -184,7 +183,6 @@ win3.add(sendBtn);
 names.addEventListener('focus', function() {
     names.animate({bottom: 320, duration:300});
     sendBtn.animate({bottom: 320, duration:300});
-    
 });
 names.addEventListener('blur', function() {
     names.animate({bottom: 50, duration:300});
@@ -196,8 +194,6 @@ var tableView = [];
 var sendMessage = sendBtn.addEventListener('click',sendBtnFunction);
 
 function sendBtnFunction(event){
-	
-	
 	var textVal = names.value;
 	var userID = user;
 	//showChat(textVal,userID,user);
@@ -210,14 +206,6 @@ function sendBtnFunction(event){
 		console.log(uName);
 		Ti.App.fireEvent('updateViews', {data:{textV:textVal,userIDV:userID,userV:user,userName:uName,time:time}});
 	});
-	hideKeyboard();
-}
-function hideKeyboard () {
-    var fields = names.getChildren(); // view is the parent view
- 
-    for(var i = 0; i < fields.length; i++) {
-        fields[i].blur();
-    }
 }
 //updates the chat from firbase anytime a new chatroom object is added
 chatroomRef.on("child_added", function(snapshot) {
@@ -240,15 +228,17 @@ chatroomRef.on("child_added", function(snapshot) {
 //inherit chats from firebase
 Ti.App.addEventListener('updateViews', function updateView(e){ 
     // console.log(e.data);
-	
+	var eventSetCount = 0;
     var color = '#49AAFE';
  	var pos = '42%';
 	if(e.data.userV == e.data.userIDV){
 	
 		//console.log(nameRef);
-		
-		messageListRef.child(e.data.userIDV+'_'+e.data.time).set({'user_id': e.data.userIDV, 'text': e.data.textV,'time': e.data.time,'name':e.data.userName});
+		if(eventSetCount == 0){
+			eventSetCount++;
+			messageListRef.child(e.data.userIDV+'_'+e.data.time).set({'user_id': e.data.userIDV, 'text': e.data.textV,'time': e.data.time,'name':e.data.userName});
 			
+		}
 		messageListRef.on('child_added', function(newMessageSnapshot) {
   			var userId = newMessageSnapshot.child('user_id').val();
   			var text = newMessageSnapshot.child('text').val();
@@ -403,8 +393,8 @@ defaultview3.add(defaultLabel);
 	reRange();
 });*/
 function destroyChatroom(){
-	chatroomRef.off("child_added");
-    messageListRef.off("child_added");
+	//chatroomRef.off("child_added");
+    //messageListRef.off("child_added");
 	var winObj = win3;
 	if (winObj.children) {
         Ti.API.info('Has children! Len: ' + winObj.children.length);
@@ -511,7 +501,7 @@ function toggleMonitoring() {
             identifier : "fake beacon"
         });
        TiBeacons.startMonitoringForRegion({
-            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109666",
+            uuid : "E2C56DB5-DFFB-48D2-B060-D0F5A7109000",
             major: 666,
             minor: 666,
             identifier : "satan beacon"
