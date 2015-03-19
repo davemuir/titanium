@@ -12,3 +12,33 @@
 	},
 	textAlign: 'center'
 } 
+"#password":{
+	top:'45%',
+	backgroundColor:'#fff',
+	width:'60%',
+	borderWidth: 1,
+	borderColor: "#999",
+	borderRadius:10,
+	passwordMask:true,
+	hintText:'Enter your password',
+	autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE,
+	height:40
+}
+"#email":{
+	top:'35%',
+	backgroundColor:'#fff',
+	width: '60%',
+	borderWidth: 1,
+	borderColor: "#999",
+	borderRadius:10,
+	hintText:'Enter your email',
+	autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE,
+	height:40
+}
+".titleLabel":{
+	top:'10%',
+	height:'18dp'
+}
+".loginBtn":{
+	top:'70%',
+}
