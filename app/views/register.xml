@@ -1,0 +1,24 @@
+<Alloy> 
+   <Window class="container" id="registerContainer"> 
+      <Label class="titleLabel">Register</Label>
+      <TextField id="firstName" class="textField"></TextField>
+      <TextField id="lastName" class="textField"></TextField>
+      <!--<TextField id="gender" class="gender"></TextField>-->
+      
+      <Picker id="gender" class="gender" selectionIndicator="true" useSpinner="false">
+      	 <!-- <Column id="column1">
+                <Row touchEnabled="false" title="gender"/>
+         </Column>-->
+            <Column accessibilityLabel="Gender"  id="column2">
+                <Row title="male"/>
+                <Row title="female"/>
+                <Row title="other"/>
+            </Column>
+        </Picker>
+        <Label id="genderLabel">Gender</Label>
+      <TextField id="email" class="textField"></TextField>
+      <TextField id="password" class="textField" ></TextField>
+      <Button id="backButton" title="Back" />
+      <Button id="registerButton" title="register" />
+   </Window> 
+</Alloy>

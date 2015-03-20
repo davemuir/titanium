@@ -4,5 +4,6 @@
       <TextField id="email" class="emailField"></TextField>
       <TextField id="password" class="passwordField" ></TextField>
       <Button id="loginButton" class="loginBtn" title="sign in" />
+      <Button id="registerBtn"  title="register" />
    </Window> 
 </Alloy>

@@ -41,4 +41,9 @@
 }
 ".loginBtn":{
 	top:'70%',
+	left:'40%'
+}
+"#registerBtn":{
+	top:'70%',
+	left:'50%'
 }

@@ -1,0 +1,75 @@
+"Window": {
+	backgroundColor: "#fff"
+}
+".titleLabel": {
+	width: Ti.UI.SIZE,
+	height: Ti.UI.SIZE,
+	color: "#000",
+	font: {
+		fontSize: 20,
+		fontFamily: 'Helvetica Neue'
+	},
+	textAlign: 'center'
+} 
+"Label": {
+	width: Ti.UI.SIZE,
+	height: Ti.UI.SIZE,
+	color: "#000",
+	font: {
+		fontSize: 20,
+		fontFamily: 'Helvetica Neue'
+	},
+} 
+"#genderLabel": {
+	top:'57.5%',
+	width: Ti.UI.SIZE,
+	height: Ti.UI.SIZE,
+	color: "#000",
+	font: {
+		fontSize: 20,
+		fontFamily: 'Helvetica Neue'
+	},
+	left:'20%'
+} 
+".textField":{
+	backgroundColor:'#fff',
+	width:'60%',
+	borderWidth: 1,
+	borderColor: "#999",
+	borderRadius:10,
+	
+	height:40
+}
+"#password":{
+	top:'45%',
+	passwordMask:true,
+	autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE,
+	hintText:'choose a password'
+}
+"#email":{
+	top:'35%',
+	autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE,
+	hintText:'email'
+}
+"#firstName":{
+	top:'15%',
+	hintText:'first name'
+}
+"#lastName":{
+	top:'25%',
+	hintText:'last name'
+}
+"#gender":{
+	top:'45%',
+	width:'30%',
+	left:'45%',
+	height:40
+}
+"#backButton":{
+	top:'74%',
+	left:'50%'
+}
+"#registerButton":{
+	top:'74%',
+	left:'40%'
+}
