@@ -103,13 +103,111 @@ var userImage = Ti.UI.createImageView({
     top:100,
 });
 var logoutBtn = Ti.UI.createButton({
-    width:'12%',
-    height:'8%',
-    title: 'log out',
+   width:'14%',
+    height:'6%',
+    color:'#fff',
+    backgroundColor: '#4DA7FF',
+    borderColor: '#B6BABF',
+    title: 'Log Out',
     bottom:'3%',
     value:'false',
     left:'75%',
+    borderRadius:15,
+    font:{fontSize: '14dp'},
+    backgroundImage: 'none'
 });
+var updatePasswordBtn = Ti.UI.createButton({
+    width:'14%',
+    height:'6%',
+    backgroundColor: '#4DA7FF',
+    borderColor: '#B6BABF',
+    color:'#fff',
+    borderRadius:15,
+    title: 'Update',
+    top:'45%',
+    value:'false',
+    left:'66%',
+    backgroundImage: 'none',
+    font:{fontSize: '14dp'}
+});
+var password = Ti.UI.createTextField({
+    height:'6%',
+    borderRadius:15,
+    font:{fontSize: '14dp'},
+     borderColor: '#B6BABF',
+    color:'#336699',
+    left:'24%',
+    width:'40%',
+    hintText:'password',
+    top:'45%',
+    //bubbleParent: false,
+    passwordMask:true,
+    paddingLeft:8,
+    paddingRight:8,
+    font:{fontSize: '16dp'},
+    //keyboardType:Titanium.UI.KEYBOARD_DEFAULT,
+    returnKeyType:Titanium.UI.RETURNKEY_NEXT,
+    //suppressReturn:false
+});
+var updateFirstnameBtn = Ti.UI.createButton({
+    width:'14%',
+    height:'6%',
+    backgroundColor: '#4DA7FF',
+    borderColor: '#B6BABF',
+    color:'#fff',
+    borderRadius:15,
+    title: 'Update',
+    top:'25%',
+    value:'false',
+    left:'66%',
+    backgroundImage: 'none',
+    font:{fontSize: '14dp'}
+});
+var firstname = Ti.UI.createTextField({
+    height:'6%',
+    font:{fontSize: '14dp'},
+     borderColor: '#B6BABF',
+    color:'#336699',
+    left:'24%',
+    borderRadius:15,
+    width:'40%',
+    hintText:'first name',
+    top:'25%',
+    paddingLeft:8,
+    paddingRight:8,
+    font:{fontSize: '16dp'},
+    returnKeyType:Titanium.UI.RETURNKEY_NEXT,
+});
+var updateLastnameBtn = Ti.UI.createButton({
+    width:'14%',
+    height:'6%',
+    backgroundColor: '#4DA7FF',
+    borderColor: '#B6BABF',
+    color:'#fff',
+    borderRadius:15,
+    title: 'Update',
+    top:'35%',
+    value:'false',
+    left:'66%',
+    backgroundImage: 'none',
+    font:{fontSize: '14dp'}
+});
+var lastname = Ti.UI.createTextField({
+    height:'6%',
+    font:{fontSize: '14dp'},
+     borderColor: '#B6BABF',
+    color:'#336699',
+    left:'24%',
+    borderRadius:15,
+    width:'40%',
+    hintText:'last name',
+    top:'35%',
+    paddingLeft:8,
+    paddingRight:8,
+    font:{fontSize: '16dp'},
+    returnKeyType:Titanium.UI.RETURNKEY_NEXT,
+});
+//for friend list basically
 nameRef.on("value", function(snapshot) {
 	var x = snapshot.hasChild('contact_list');
 	if(x == 1){
@@ -142,6 +240,12 @@ nameRef.on("value", function(snapshot) {
 listView.sections = [section];
 win1.add(listView);
 win2.add(userLabel);
+win2.add(updatePasswordBtn);
+win2.add(updateFirstnameBtn);
+win2.add(firstname);
+win2.add(updateLastnameBtn);
+win2.add(lastname);
+win2.add(password);
 win2.add(logoutBtn);
 //callback function on logoutbutton
 logoutBtn.addEventListener('click',function(e){
@@ -152,19 +256,29 @@ logoutBtn.addEventListener('click',function(e){
 	stopMonitor();
 	TiBeacons.removeEventListener("exitedRegion", exitRegion);
 	TiBeacons.removeEventListener("enteredRegion", enterRegion);
-	//stopMonitoringForAllRegions();
 	tabGroup.close();
-	//setTimeout(function(){ 
-			//toggleMonitoring();
-			$.destroy();
-			var index = Alloy.createController("index",{
-				
-    		}).getView();
-	//}, 2000);
-	
-   //$.loginContainer.close();
-});
 
+	$.destroy();
+	var index = Alloy.createController("index",{
+				
+    }).getView();
+
+});
+updateFirstnameBtn.addEventListener('click',function(e){
+	var fname = firstname.value;
+	if(fname.length <= 1){
+		alert('Error: First name must be at least 2 characters long');
+	}else{
+		var quickListRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com/users/');
+		var usersRef = quickListRef.child(user);
+		usersRef.update({
+ 
+    	first:fname
+   
+  		});
+ 	}
+  //quickListRef.
+});
 
 var win3 = Titanium.UI.createWindow({  
     title:'Chat',
@@ -233,9 +347,15 @@ var names = Titanium.UI.createTextArea({
  sendBtn = Ti.UI.createButton({
     width:'12%',
     height:'8%',
-    backgroundImage:'send.png',
+    borderRadius:10,
+   	//backgroundImage:'send.png',
     bottom:'3%',
     left:'75%',
+    backgroundColor: '#4DA7FF',
+    borderColor: '#B6BABF',
+    color:'#fff',
+    title:'Send',
+     font:{fontSize: '20dp'}
 });
 
 

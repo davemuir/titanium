@@ -15,6 +15,7 @@
     <property name="ti.ui.defaultunit" type="string">dp</property>
     <property name="com.leftlanelab.firebase.forge" type="string">https://l3-appcelerator-demo.firebaseio.com/</property>
     <property name="com.leftlanelab.firebase.persistence" type="bool">true</property>
+    <property name="acs-api-key" type="string">V3sHvdUcDvQTRJ1xAaqruxZoSE00HIr9</property>
   ...
     <ios>
         <min-ios-ver>6.1</min-ios-ver>

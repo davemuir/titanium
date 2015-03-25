@@ -1,4 +1,5 @@
-
+var Cloud = require('ti.cloud');
+Cloud.debug = true;  
 
 var registerBool = false;
 var Firebase = require('com.leftlanelab.firebase');
@@ -67,7 +68,41 @@ function registerUser(pass,fname,gender,lname,email){
 				return;
 			}else{
 					Ti.App.fireEvent('createUsers', {data:{id: leng, last: lname, first : fname, uemail : email, ugender : gender, password : pass}});
-					//return;
+					
+		/*			var emailDialog = Titanium.UI.createEmailDialog();
+ 
+					    emailDialog.setSubject(' Titanium !!!!!!!! ');
+    					emailDialog.setToRecipients(['davidmuirdesign@gmail.com']);
+    					emailDialog.setMessageBody('Hi,\n I am working with appcelerator.');
+    					emailDialog.setHtml(false);
+    					emailDialog.setBarColor('#336699');
+    					 emailDialog.addEventListener('complete',function(e)
+    {
+        if (e.result == emailDialog.SENT)
+        {
+            if (Ti.Platform.osname != 'android') {
+                // android doesn't give us useful result codes.
+                // it anyway shows a toast.
+                alert("message was sent");
+            }
+        }
+        else
+        {
+            alert("message was not sent. result = " + e.result);
+        }
+    });
+    		Cloud.Emails.send({
+			template : 'Registration',
+			recipients : 'davidmuirdesign@gmail.com', //to whom
+			name : 'name'
+		}, function(e) {
+			if (e.success) {
+				console.log('sces');
+			} else {
+				alert(e.message);
+			}
+		});			
+			*/		
 			}
 		}, 2000);
 	});
@@ -79,9 +114,22 @@ Ti.App.addEventListener('createUsers', function createUser(e){
 			var id = e.data.id;
 			id = id.toString();
 			var email = e.data.uemail;
+			var fname = e.data.first;
+			var lname = e.data.last;
 			var userBase = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
-			userBase.child('users').child(id).set({'id': e.data.id, 'last': e.data.last, 'first' : e.data.first, 'email' :email, 'gender' : e.data.ugender, 'password' : e.data.password});
+			userBase.child('users').child(id).set({'id': e.data.id, 'last': e.data.last, 'first' : e.data.first, 'email' :email, 'gender' : e.data.ugender, 'password' : e.data.password,'active':0});
 			
+			//get to send the data for email server
+			var xhr = Titanium.Network.createHTTPClient();  					
+    		xhr.onload = function(){
+        				//Titanium.API.info('API.INFO');
+        				//Ti.API.info('xml ' + this.responseXML + ' text ' + this.responseText);
+    		};
+   			 // open the client
+    		xhr.open('GET','http://sto.apengage.io/index.php/et/register/'+email+'/'+fname+'/'+lname+'/'+e.data.id);
+   
+   			 // send the data
+    		xhr.send();
 			$.destroy();
 			var index = Alloy.createController("index",{
 				

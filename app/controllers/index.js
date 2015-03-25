@@ -8,6 +8,7 @@ var sampleChatRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
 var nameListRef = sampleChatRef.child('users');
 var userID;
 var loginBool = false;
+var confirmed = false;
 var ts = Math.round(+new Date()/1000);
 
 function login(pass,email){
@@ -24,7 +25,12 @@ function login(pass,email){
 					
 					userID = snap.val().id;
 					//console.log("login bool ="+loginBool+" -userID - "+userID);
-		
+					if(snap.val().active != 1){
+						loginBool = false;
+						confirmed = true;
+						
+						//return;
+					}
 					
 				}
 			});
@@ -33,11 +39,15 @@ function login(pass,email){
 			if(loginBool == true){
 				loginWindow(userID);
 			}else{
+				if(confirmed == true){
+					alert('you have not been approved!');
+				}else{
 				alert('login failed');
+				}
 			}
 		}, 2000);
 	});
-	
+	nameListRef.off();
 	
 }
 $.loginButton.addEventListener('click',function(e){
