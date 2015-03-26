@@ -12,15 +12,19 @@ var user = args.id;
 user = user.toString();
 var startCount = 'true';
 var unix = args.ts;
-
+var p2pSections = [];
 var sampleChatRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com');
+var p2pchatroom = Firebase.new('https://scorching-fire-9510.firebaseIO.com/p2p');
 var nameRef = sampleChatRef.child('users/'+user);
 var nameListRef = sampleChatRef.child('users');
 var chatroomRef = Firebase.new('https://scorching-fire-9510.firebaseIO.com/chat_room');
 var messageListRef = sampleChatRef.child('chat_room/');
 var chatRoomBool = false;
 var chatDialogCount = 0;
-var listView = Ti.UI.createListView();
+var listView = Ti.UI.createListView({
+	width:'30%',
+	left:0
+});
 var section = Ti.UI.createListSection();
 var geoCheck = false;
 var orientation;
@@ -239,6 +243,40 @@ nameRef.on("value", function(snapshot) {
 
 listView.sections = [section];
 win1.add(listView);
+
+/*
+ * -------create other half of window for chat view --------
+ */
+//main window for p2p chat 
+var p2pparentView3 = Titanium.UI.createScrollView({
+   backgroundColor:'#fff',
+   width:'70%',
+   right:0,
+   height:'auto',
+   contentHeight:'100%',
+   contentWidth:'100%',
+   id:"scrollableChatView",
+   top:0
+});
+
+
+var p2pscrollableView = Ti.UI.createScrollableView({
+  views:p2pSections,
+  showPagingControl:false
+ 
+});
+win1.add(p2pparentView3);
+p2pparentView3.add(p2pscrollableView);
+
+listView.addEventListener('itemclick',function(e){
+	var lin = e.section.getItemAt(e.itemIndex);
+	var id = lin.properties;
+	id = id.id;
+	//alert('list id - '+id);
+	//profileWindow(id);
+	p2pWindow(id);
+ });
+ 
 win2.add(userLabel);
 win2.add(updatePasswordBtn);
 win2.add(updateFirstnameBtn);
@@ -299,13 +337,8 @@ if(chatRoomBool == false){
 chatDialogCount = 0;	
 unix = Math.round(+new Date()/1000);
 console.log('create the room');	
-listView.addEventListener('itemclick',function(e){
-	var lin = e.section.getItemAt(e.itemIndex);
-	var id = lin.properties;
-	id = id.id;
-	profileWindow(id);
- });
- 
+
+
 //window for chat 
 var parentView3 = Titanium.UI.createScrollView({
    backgroundColor:'#fff',
@@ -671,14 +704,291 @@ function destroyChatroom(){
 	chatDialogCount = 0;
 	return chatDialogCount;
 }
-//book collection stuff create maybe some models of friends lists
+
 function profileWindow(id){
-    var profile = Alloy.createController("profile",{
+	//for the profile model view
+    /*var profile = Alloy.createController("profile",{
         id: id
     }).getView();
-    profile.open();
+    profile.open();*/
+      
+}
+/*----------------  P2P Chat add new view to scrollable view ---------------------*/
+function p2pWindow(id){
+    
+var p2pmsg = Titanium.UI.createTextArea({
+    color:'#336699',
+    bottom:'3%',
+    left:'33%',
+    width:'40%',
+    height:'8%',   
+    hintText:'message',
+    bubbleParent: false,
+    paddingLeft:8,
+    paddingRight:8,
+    font:{fontSize: '16dp'},
+    keyboardType:Titanium.UI.KEYBOARD_DEFAULT,
+    returnKeyType:Titanium.UI.RETURNKEY_NEXT,
+    suppressReturn:false
+});	
+
+var p2pView = Titanium.UI.createView({
+   backgroundColor:'#D4D4D4',
+   width:'100%',
+   height:'88%',
+   p2pid:id,
+   top:0
+});
+
+
+ var p2psendBtn = Ti.UI.createButton({
+    width:'12%',
+    height:'8%',
+    borderRadius:10,
+   	//backgroundImage:'send.png',
+    bottom:'3%',
+    left:'75%',
+    backgroundColor: '#4DA7FF',
+    borderColor: '#B6BABF',
+    color:'#fff',
+    title:'Send',
+     font:{fontSize: '20dp'}
+});
+
+
+
+
+var p2ptable = Ti.UI.createTableView({
+	 backgroundColor:'#D4D4D4',
+	  separatorColor:'transparent',
+        separatorStyle:0,
+        scrollable:true
+});
+
+//will calculate logic for individual chat views based on ids
+
+var p2pLength = p2pscrollableView.views.length;
+if(p2pLength < 1){
+	p2pSections.push(p2pView);
+	p2pscrollableView.views = p2pSections;
+	p2pView.add(p2ptable);
+	win1.add(p2pmsg);
+	win1.add(p2psendBtn);
+	
+}else{
+	var flag = true;
+	for(var s = 0; s < p2pLength; s++){
+		console.log(p2pscrollableView.views);
+		if(id == p2pscrollableView.views[s].p2pid) {
+			console.log('match'); 
+			flag = false;
+		}
+	}
+	if(flag == true){
+			console.log('no match in views yet');
+			p2pSections.push(p2pView);
+			p2pscrollableView.views = p2pSections;
+			p2pView.add(p2ptable);
+			win1.add(p2pmsg);
+			win1.add(p2psendBtn);
+	}
+}
+//update the sections here
+
+
+p2pmsg.addEventListener('focus', function() {
+	var ab = Ti.Platform.model;
+	//var ipn = ab.search('iPad');
+	
+	//var pWidth = Ti.Platform.displayCaps.platformWidth;
+	var pHeight = Ti.Platform.displayCaps.platformHeight;
+	if(ab.search('iPad') == 0) {
+		if(orientation == 0){
+			//ipad is landscape
+  			var halfHeight = pHeight*0.42;
+  			var btnW = '4%';
+  			var btnH = '8%';
+  		}else{
+  			//ipad is portait
+  			var halfHeight = pHeight*0.23;
+  			var btnW = 65;
+  			var btnH = 65;
+  		}
+	}else{
+		//is ipod/iphone
+		var halfHeight = pHeight*0.38;
+		var btnW = '8%';
+		var btnH = '8%';
+	}
+	console.log(halfHeight);
+    p2pmsg.animate({bottom: halfHeight, duration:300});
+    p2psendBtn.animate({bottom: halfHeight, duration:300});
+
+});
+p2pmsg.addEventListener('blur', messageSent);
+function messageSent(e){
+	//win3.remove(downBtn);
+	//hideKeyboard();
+	var pHeight = Ti.Platform.displayCaps.platformHeight;
+	var bottomHeight = 0.03*pHeight;
+	console.log(bottomHeight);
+    p2pmsg.animate({bottom: bottomHeight, duration:300});
+    p2psendBtn.animate({bottom: bottomHeight, duration:300});
+    
 }
 
+
+
+var p2psendMessage = p2psendBtn.addEventListener('click',p2psendBtnFunction);
+
+//updates the chat from firbase anytime a new chatroom object is added
+
+
+var p2ptableView = [];
+function p2psendBtnFunction(event){
+	
+	
+	var textVal = p2pmsg.value;
+	var userID = user;
+	//showChat(textVal,userID,user);
+	p2pmsg.value = '';
+	nameListRef.child(userID).once("value", function(snapshot) {
+		console.log('p2p send to fire function');
+		var uName = snapshot.val();
+		var time =  Math.round(+new Date()/1000);
+		uName = uName.first;
+		 
+		console.log(uName);
+		Ti.App.fireEvent('p2pupdateViews', {data:{textV:textVal,userIDV:userID,userV:user,userName:uName,time:time}});
+	});
+	//hideKeyboard();
+}
+//on the single p2p chat room instance, compare smaller id for first
+
+p2pchatroom.on("child_added", function(snapshot) {
+		
+		var snap = snapshot.val();
+		if(unix <= snap.time && snap.user_id != user){
+  			//console.log(snap);
+  			console.log('p2p child added');
+  			var textVal = snap.text;
+  			var userID = snap.user_id;
+  			var uName = snap.name;
+  			var time = snap.time;
+  			//showChat(textVal,userID,user);
+  			Ti.App.fireEvent('p2pupdateViews', {data:{textV: textVal, userIDV: userID,userV:user,userName:uName,time:time}});
+  			//do function where put on tableview as a dialouge from backend
+		}
+}, function (errorObject) {
+  console.log("The read failed: " + errorObject.code);
+});
+
+//inherit chats from firebase
+Ti.App.addEventListener('p2pupdateViews', function p2pupdateView(e){ 
+    //console.log(e.data);
+	console.log('enter updateviews function');
+    var color = '#49AAFE';
+ 	var pos = '42%';
+	//if(e.data.userV == e.data.userIDV){
+	
+		//console.log(nameRef);
+		
+		p2pchatroom.child(e.data.userIDV+'_'+e.data.time).set({'user_id': e.data.userIDV, 'text': e.data.textV,'time': e.data.time,'name':e.data.userName});
+			
+		p2pchatroom.on('child_added', function(newMessageSnapshot) {
+  			var userId = newMessageSnapshot.child('user_id').val();
+  			var text = newMessageSnapshot.child('text').val();
+  			//console.log(text);
+		});
+		color = '#5DFF92';
+		pos = 20;
+	// }
+
+	var a = new Date(e.data.time*1000);
+	var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  	var year = a.getFullYear();
+  	var month = months[a.getMonth()];
+  	var date = a.getDate();
+  	var hour = a.getHours();
+  	var min = a.getMinutes();
+  	var sec = a.getSeconds();
+  	var time = date + ',' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+  	
+  	
+	var p2prow = Ti.UI.createTableViewRow({
+    className: 'row',
+    objName: 'row',
+    backgroundColor:'#D4D4D4',
+    top:10,
+    user_id:e.data.userIDV,
+    touchEnabled: true
+  	});
+  	//outside view wrapper
+  	var p2penabledWrapperView = Ti.UI.createView({
+    backgroundColor:'#D4D4D4',
+    objName: 'enabledWrapperView',
+    width: Ti.UI.FILL, height:Ti.UI.SIZE
+  });
+  
+  var p2pdisabledWrapperView = Ti.UI.createView({
+    backgroundColor:color,//46BCFF
+    objName: 'disabledWarpperView',
+    touchEnabled: false,
+    width: '55%', 
+    height: Ti.UI.SIZE,
+    borderRadius:10,
+     left:pos
+  });
+  p2penabledWrapperView.add(p2pdisabledWrapperView);
+  
+  var p2plabel = Ti.UI.createLabel({
+    backgroundColor:color,
+    color: '#333131',
+    text: e.data.textV,
+    touchEnabled: false,
+     left:10,
+     top:50,
+      font:{fontSize: '16dp'},
+     height: Ti.UI.SIZE
+  });
+  	
+  	var p2pnameLabel = Ti.UI.createLabel({
+    backgroundColor:color,
+    color: '#010101',
+    text: e.data.userName,
+    touchEnabled: false,
+     left:10,
+     top:5,
+     font:{fontSize: '20dp'},
+     height: Ti.UI.SIZE
+  });
+  	  	var p2ptimeLabel = Ti.UI.createLabel({
+    backgroundColor:color,
+    color: '#333131',
+    text: time,
+    touchEnabled: false,
+     left:10,
+     top:28,
+     font:{fontSize: '12dp'},
+     height: Ti.UI.SIZE
+  });
+  
+  	p2pdisabledWrapperView.add(p2pnameLabel);
+  	p2pdisabledWrapperView.add(p2ptimeLabel);
+  	p2pdisabledWrapperView.add(p2plabel);
+  	p2prow.add(p2penabledWrapperView);
+  	p2ptableView.push(p2prow);
+  
+	p2ptable.setData(p2ptableView);
+	
+	var len = p2ptable.data[0].rows.length;
+	var lengt = p2ptable.data.length;
+	p2ptable.scrollToIndex(len-1);
+
+});
+
+}
+//end p2p page
 /*----------------  BEACON MODULE ---------------------*/
 
 //beacon ti beacons stuff

@@ -36,14 +36,31 @@
 	height:40
 }
 ".titleLabel":{
-	top:'10%',
+	top:'8%',
 	height:'18dp'
 }
 ".loginBtn":{
 	top:'70%',
-	left:'40%'
+	left:'34%',
+	width:'14%',
+    height:'6%',
+    color:'#fff',
+    backgroundColor: '#4DA7FF',
+    borderColor: '#B6BABF',
+    borderRadius:15,
+    font:{fontSize: '14dp'},
+    backgroundImage: 'none'
 }
 "#registerBtn":{
 	top:'70%',
-	left:'50%'
+	left:'56%',
+	width:'14%',
+    height:'6%',
+    color:'#fff',
+    backgroundColor: '#4DA7FF',
+    borderColor: '#B6BABF',
+    borderRadius:15,
+    font:{fontSize: '14dp'},
+    backgroundImage: 'none'
 }
+

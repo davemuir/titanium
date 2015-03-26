@@ -9,7 +9,8 @@
 		fontSize: 20,
 		fontFamily: 'Helvetica Neue'
 	},
-	textAlign: 'center'
+	textAlign: 'center',
+	top:'8%'
 } 
 "Label": {
 	width: Ti.UI.SIZE,
